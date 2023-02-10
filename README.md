@@ -1,10 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# sherlock
-
-<!-- badges: start -->
-<!-- badges: end -->
+# sherlock <img src="man/figures/logo.png" align="right" height="200" style="float:right; height:150px;" />
 
 The **{sherlock} R package** provides powerful graphical displays and
 statistical tools to aid structured problem solving and diagnosis. The
@@ -12,13 +9,54 @@ functions of the package are especially useful for applying the process
 of elimination as a problem diagnosis technique. **{sherlock}** was
 designed to seamlessly work with the `tidyverse` set of packages.
 
+More specifically, **{sherlock}** features functionality to
+
+- create a project folder/sub-folder structure and .Rproj file for your
+  problem solving project with one function call
+- read in tabular data from various sources
+- facilitate reading in and cleaning many files all at once (for example
+  raw data from data loggers or sensors)
+- create powerful and highly customizable visual displays, some of which
+  are non-existent even in popular statistical packages
+- use a custom **{sherlock}** ggplot2 theme, which offers a
+  clean-looking visual appearance
+- use sample datasets to test plotting functions
+- save data and plots into an Excel file
+
 *“That is to say, nature’s laws are causal; they reveal themselves by
 comparison and difference, and they operate at every multi-variate
 space-time point” - Edward Tufte*
 
+I would love to hear your feedback on `sherlock`. You can leave a note
+on current issues, bugs and even request new features
+[here](https://github.com/gaboraszabo/sherlock/issues).
+
+`sherlock` 0.6.0 is already in the works. In addition to fixing a few
+bugs and making enhancements to already-existing functionality, I will
+be adding new plotting, statistical analysis and helper functions, such
+as:
+
+- A new set of plotting functions and statistical tests called the
+  Tukey-Duckworth test for problem diagnosis
+- `load_files()`, which is a function to read in and clean multiple
+  files. Particularly useful when reading in multiple files having the
+  same variables, for example reading in data from an experiment where
+  data was logged and saved separately for each individual unit.
+  Integration of a custom data cleaning function.
+- `create_project_folder()`, which is a helper function to quickly
+  create a project folder with a clever sub-folder structure for your
+  project.
+
 ## Installation
 
-You can install the development version of `sherlock` from
+`sherlock` is available on CRAN and can be installed by running the
+below script:
+
+``` r
+install.packages("sherlock")
+```
+
+You can also install the development version of `sherlock` from
 [GitHub](https://github.com/) with:
 
 ``` r
@@ -27,10 +65,6 @@ devtools::install_github("gaborszabo11/sherlock")
 ```
 
 ## Functions
-
-While the package is currently under development, quite a few functions
-are already available and ready to be used. Available functions are as
-follows:
 
 #### Plotting functions
 
@@ -47,6 +81,8 @@ follows:
 `draw_polar_small_multiples()`
 
 `draw_interaction_plot()`
+
+`draw_pareto_chart()`
 
 `draw_process_behavior_chart()`
 
@@ -79,6 +115,7 @@ Here are a few examples:
 library(sherlock)
 library(ggh4x)
 #> Loading required package: ggplot2
+#> Warning: package 'ggplot2' was built under R version 4.2.2
 ```
 
 ``` r
@@ -117,13 +154,17 @@ library(dplyr)
 
 polar_small_multiples_data %>% 
   filter(Mold_Cavity_Number %in% c(4, 6)) %>% 
+  rename(Radius = "ID_2") %>% 
   draw_polar_small_multiples(angular_axis   = ID_Measurement_Angle, 
-                             x_y_coord_axis = ID_2, 
+                             x_y_coord_axis = Radius, 
                              grouping_var   = Tip_Bottom, 
                              faceting_var_1 = Mold_Cavity_Number,
                              point_size     = 0.5, 
                              connect_with_lines = TRUE, 
-                             label_text_size = 7)
+                             label_text_size = 7) +
+  scale_y_continuous(limits = c(0.09, 0.115))
+#> Scale for y is already present.
+#> Adding another scale for y, which will replace the existing scale.
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
@@ -180,7 +221,7 @@ timeseries_scatterplot_data %>%
                               x_axis_text    = 7,
                               interactive    = FALSE)
 #> Joining, by = c("date", "cavity")
-#> Warning: Removed 6 rows containing missing values (geom_point).
+#> Warning: Removed 6 rows containing missing values (`geom_point()`).
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />

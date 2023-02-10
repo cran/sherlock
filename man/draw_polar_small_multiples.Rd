@@ -12,6 +12,8 @@ draw_polar_small_multiples(
   faceting_var_1,
   faceting_var_2,
   connect_with_lines = FALSE,
+  connect_start_and_end_points = TRUE,
+  x_y_coord_axis_limits = c(0, NA),
   point_size = 2,
   line_size = 0.6,
   point_alpha = 0.6,
@@ -29,11 +31,15 @@ draw_polar_small_multiples(
 
 \item{grouping_var}{grouping variable (required)}
 
-\item{faceting_var_1}{set first faceting variable (optional)}
+\item{faceting_var_1}{Set first faceting variable (optional)}
 
-\item{faceting_var_2}{set second faceting variable (optional)}
+\item{faceting_var_2}{Set second faceting variable (optional)}
 
-\item{connect_with_lines}{logical. if FALSE, default, values within each group are not connected with a line (optional)}
+\item{connect_with_lines}{Logical. If set to TRUE, values within each group are connected with a line. By default, it is set to FALSE (optional)}
+
+\item{connect_start_and_end_points}{Logical. If set to TRUE, the start and end points of the lines get connected. It is useful when trying to draw a complete circle but may not be useful when only trying to draw a shape different than that (e.g. a semicircle). By default, it is set to TRUE (optional)}
+
+\item{x_y_coord_axis_limits}{Set x-y coordinate axis limits. By default, it is set to start at 0. (optional)}
 
 \item{point_size}{Set point size. By default, it is set to 2  (optional)}
 
@@ -43,15 +49,15 @@ draw_polar_small_multiples(
 
 \item{line_alpha}{Set line transparency. By default, it is set to 0.5  (optional)}
 
-\item{label_text_size}{Size of text for labels. By default, it is set to 11  (optional)}
+\item{label_text_size}{Size of text for labels. By default, it is set to 11. (optional)}
 
-\item{analysis_desc_label}{Label (subtitle) for analysis description. By default, it is set to NULL  (optional)}
+\item{analysis_desc_label}{Label (subtitle) for analysis description. By default, it is set to NULL. (optional)}
 }
 \value{
 A 'ggplot' object
 }
 \description{
-Draws a Polar Small Multiple Plot
+Draws a Polar Small Multiples Plot
 }
 \examples{
 library(dplyr)

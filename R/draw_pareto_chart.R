@@ -35,7 +35,7 @@ draw_pareto_chart <- function(data, cat_var, continuous_var, highlight_first_n_i
   data <- data %>%
     dplyr::arrange(dplyr::desc(!!continuous_var_expr)) %>%
     dplyr::mutate(rank = dplyr::row_number()) %>%
-    dplyr::mutate(!!(cat_var_expr) := !!(cat_var_expr) %>% forcats::as_factor() %>% forcats::fct_rev()) %>%
+    dplyr::mutate(!!(cat_var_expr) := !!(cat_var_expr) %>% forcats::as_factor() %>% forcats::fct_reorder(!!continuous_var_expr)) %>%
     dplyr::mutate(!!(continuous_var_expr) := !!(continuous_var_expr) %>% as.numeric()) %>%
     dplyr::mutate(fill = column_fill) %>%
     dplyr::mutate(alpha = dplyr::case_when(rank <= highlight_first_n_items ~ 0.8,
@@ -57,7 +57,8 @@ draw_pareto_chart <- function(data, cat_var, continuous_var, highlight_first_n_i
     sherlock::theme_sherlock() +
     ggplot2::theme(axis.title.x = ggplot2::element_blank(),
                    plot.title   = ggplot2::element_text(size = 18),
-                   axis.text.x  = ggplot2::element_text(size = axis_text_size)) +
+                   axis.text.x  = ggplot2::element_text(size = axis_text_size),
+                   axis.title.y = ggplot2::element_blank()) +
     ggplot2::scale_y_continuous(position = "right") +
     ggplot2::labs(title    = title_label,
                   subtitle = ifelse(is.null(analysis_desc_label),
