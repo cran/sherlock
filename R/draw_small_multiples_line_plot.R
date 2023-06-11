@@ -9,6 +9,7 @@
 #' @param grouping_var set grouping variable (required)
 #' @param faceting_var_1 Set first faceting variable (optional)
 #' @param faceting_var_2 Set second faceting variable (optional)
+#' @param plot_max_values Highlights maximum values per group. By default, it is set to FALSE (optional)
 #' @param lowest_highest_units takes a vector of strings corresponding to the lowest/highest units to be highlighted (optional)
 #' @param unique_color_by_group set whether to display each group in a unique color. By default, it is set to FALSE (optional)
 #' @param size Set line size. By default, it is set to 0.7  (optional)
@@ -17,16 +18,21 @@
 #' @param analysis_desc_label Label (subtitle) for analysis description. By default, it is set to NULL  (optional)
 #' @param x_axis_label Label for x axis. By default, it is set to display x axis column name  (optional)
 #' @param y_axis_label Label for y axis. By default, it is set to display y axis column name  (optional)
+#' @param n_breaks_x_axis Set number of breaks on X axis. By default, it is set to 10 (optional)
+#' @param n_breaks_y_axis Set number of breaks on Y axis. By default, it is set to 10 (optional)
+#' @param accuracy Set number of decimal places to be displayed on X and Y axes. Examples: 0.1 - one decimal place, 0.01 - two decimal places, 0.001 - three decimal places etc. By default, it is set to 0.01 (optional)
 #'
 #' @return A 'ggplot' or 'plotly' object
 #'
 #' @export
 
 
-draw_small_multiples_line_plot <- function(data, x_axis_var, y_axis_var, grouping_var, faceting_var_1, faceting_var_2,
+draw_small_multiples_line_plot <- function(data, x_axis_var, y_axis_var, grouping_var,
+                                           faceting_var_1, faceting_var_2, plot_max_values = FALSE,
                                            lowest_highest_units, unique_color_by_group = FALSE,
                                            size = 0.7, alpha = 0.4, interactive = TRUE,
-                                           analysis_desc_label = NULL, x_axis_label = NULL, y_axis_label = NULL) {
+                                           analysis_desc_label = NULL, x_axis_label = NULL, y_axis_label = NULL,
+                                           n_breaks_x_axis = 10, n_breaks_y_axis = 10, accuracy = 0.01) {
 
   # 1. Tidy Eval ----
   x_axis_var_expr <- rlang::enquo(x_axis_var)
@@ -35,8 +41,24 @@ draw_small_multiples_line_plot <- function(data, x_axis_var, y_axis_var, groupin
   faceting_var_1_expr <- rlang::enquo(faceting_var_1)
   faceting_var_2_expr <- rlang::enquo(faceting_var_2)
 
-  data <- data %>%
-    dplyr::mutate(!!grouping_var_expr := forcats::as_factor(!!grouping_var_expr))
+  # 2.1 Data transformation for plot_max_values arg ----
+  if (!plot_max_values) {
+    data <- data %>%
+      dplyr::mutate(!!grouping_var_expr := forcats::as_factor(!!grouping_var_expr))
+  }
+
+  if (plot_max_values) {
+    data <- data %>%
+      dplyr::mutate(!!grouping_var_expr := forcats::as_factor(!!grouping_var_expr)) %>%
+      dplyr::group_by({{grouping_var}}, {{faceting_var_1}}, {{faceting_var_2}}) %>%
+      dplyr::mutate(max = max({{y_axis_var}})) %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(value = dplyr::case_when({{y_axis_var}} == max ~ max)) %>%
+      dplyr::mutate(point_size = dplyr::case_when({{y_axis_var}} == max ~ 3)) %>%
+      dplyr::mutate(point_stroke = dplyr::case_when({{y_axis_var}} == max ~ 2)) %>%
+      dplyr::mutate(point_shape = dplyr::case_when({{y_axis_var}} == max ~ 21) %>% forcats::as_factor())
+  }
+
 
 
   # 2. Color and size columns for lowest_highest_units arg ----
@@ -56,14 +78,27 @@ draw_small_multiples_line_plot <- function(data, x_axis_var, y_axis_var, groupin
       plot <- data %>%
         ggplot2::ggplot(ggplot2::aes(!!x_axis_var_expr, !!y_axis_var_expr, group = !!grouping_var_expr)) +
         ggplot2::geom_line(ggplot2::aes(color = !!grouping_var_expr), alpha = alpha, size = size)
+
+      if (plot_max_values) {
+        plot <- plot +
+          ggplot2::geom_point(ggplot2::aes(x = !!x_axis_var_expr, y = value), size = data$point_size,
+                              color = scale_color_sherlock(3), stroke = ifelse(interactive, 0.5, 1),
+                              shape = data$point_shape, alpha = 1)
+      }
     }
 
     if (!unique_color_by_group) {
       plot <- data %>%
         ggplot2::ggplot(ggplot2::aes(!!x_axis_var_expr, !!y_axis_var_expr, group = !!grouping_var_expr)) +
         ggplot2::geom_line(color = "grey60", alpha = alpha, size = size)
-    }
 
+      if (plot_max_values) {
+        plot <- plot +
+          ggplot2::geom_point(ggplot2::aes(x = !!x_axis_var_expr, y = value), size = data$point_size,
+                              stroke = ifelse(interactive, 0.5, 1),
+                              shape = data$point_shape, color = "grey50", alpha = 1)
+      }
+    }
   }
 
 
@@ -73,6 +108,13 @@ draw_small_multiples_line_plot <- function(data, x_axis_var, y_axis_var, groupin
       plot <- data %>%
         ggplot2::ggplot(ggplot2::aes(!!x_axis_var_expr, !!y_axis_var_expr, group = !!grouping_var_expr)) +
         ggplot2::geom_line(ggplot2::aes(color = !!grouping_var_expr), alpha = alpha, size = data$size)
+
+      if (plot_max_values) {
+        plot <- plot +
+          ggplot2::geom_point(ggplot2::aes(x = !!x_axis_var_expr, y = value, color = !!grouping_var_expr),
+                              size = data$point_size, stroke = ifelse(interactive, 0.5, 1),
+                              shape = data$point_shape, alpha = alpha)
+      }
     }
 
     if (!unique_color_by_group) {
@@ -80,8 +122,13 @@ draw_small_multiples_line_plot <- function(data, x_axis_var, y_axis_var, groupin
         ggplot2::ggplot(ggplot2::aes(!!x_axis_var_expr, !!y_axis_var_expr, group = !!grouping_var_expr)) +
         ggplot2::geom_line(color = data$color, alpha = alpha, size = data$size)
 
+      if (plot_max_values) {
+        plot <- plot +
+          ggplot2::geom_point(ggplot2::aes(x = !!x_axis_var_expr, y = value), size = data$point_size,
+                              stroke = ifelse(interactive, 0.5, 1),
+                              shape = data$point_shape, color = "grey60", alpha = 1)
+      }
     }
-
   }
 
 
@@ -146,9 +193,14 @@ draw_small_multiples_line_plot <- function(data, x_axis_var, y_axis_var, groupin
   }
 
 
+  # 6. X-Y axis ----
+  plot <- plot +
+    ggplot2::scale_x_continuous(n.breaks = n_breaks_x_axis, labels = scales::number_format(accuracy = accuracy)) +
+    ggplot2::scale_y_continuous(n.breaks = n_breaks_y_axis, labels = scales::number_format(accuracy = accuracy))
 
 
-  # 6. Interactivity with ggplotly ----
+
+  # 7. Interactivity with ggplotly ----
   if (interactive) {
     plot <- plotly::ggplotly(plot)
   }

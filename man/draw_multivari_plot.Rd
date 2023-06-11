@@ -6,10 +6,11 @@
 \usage{
 draw_multivari_plot(
   data,
-  response,
-  factor_1,
-  factor_2,
-  factor_3,
+  y_var,
+  grouping_var_1,
+  grouping_var_2,
+  grouping_var_3,
+  grouping_var_4,
   data_point_label = NULL,
   plot_means = FALSE,
   x_axis_text_size = 11,
@@ -20,23 +21,25 @@ draw_multivari_plot(
 )
 }
 \arguments{
-\item{data}{input dataset to be plotted (required)}
+\item{data}{Input dataset to be plotted (required)}
 
-\item{response}{response variable, Y (required)}
+\item{y_var}{Response variable, Y (required)}
 
-\item{factor_1}{select column for lowest level factor (required)}
+\item{grouping_var_1}{Select column for lowest level grouping variable (required)}
 
-\item{factor_2}{select column for mid-level factor (required)}
+\item{grouping_var_2}{Select column for second level grouping variable (required)}
 
-\item{factor_3}{select column for top level factor (optional)}
+\item{grouping_var_3}{Select column for third level grouping variable (optional)}
 
-\item{data_point_label}{select column to label data points (optional)}
+\item{grouping_var_4}{Select column for fourth level grouping variable (optional)}
 
-\item{plot_means}{logical. if FALSE, default, means for mid-level factor are not plotted (optional)}
+\item{data_point_label}{Select column to label data points (optional)}
 
-\item{x_axis_text_size}{set x axis text size. options are "normal" (default), "small", "xs" and "none" (optional)}
+\item{plot_means}{Logical. if FALSE, default, means for mid-level factor are not plotted (optional)}
 
-\item{panel_text_size}{set panel text size. By default, it is set to 14 (optional)}
+\item{x_axis_text_size}{Set X axis text size. By default, it is set to 11  (optional)}
+
+\item{panel_text_size}{Set panel text size. By default, it is set to 14 (optional)}
 
 \item{point_size}{Set point size. By default, it is set to 2.5  (optional)}
 
@@ -56,13 +59,13 @@ library(ggh4x)
 
 polar_small_multiples_data \%>\%
   filter(ID_Measurement_Angle \%in\% c(0, 45, 90, 135)) \%>\%
-  normalize_observations(response = ID,
+  normalize_observations(y_var = ID,
                          grouping_var = Tip_Bottom,
                          ref_values = c(0.2075, 0.2225)) \%>\%
-  draw_multivari_plot(response    = ID_normalized,
-                     factor_1    = ID_Measurement_Angle,
-                     factor_2    = Mold_Cavity_Number,
-                     factor_3    = Tip_Bottom,
+  draw_multivari_plot(y_var            = ID_normalized,
+                     grouping_var_1    = ID_Measurement_Angle,
+                     grouping_var_2    = Mold_Cavity_Number,
+                     grouping_var_3    = Tip_Bottom,
                      x_axis_text = 6) +
   draw_horizontal_reference_line(reference_line = 0)
 
